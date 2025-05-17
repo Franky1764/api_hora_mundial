@@ -49,7 +49,21 @@ Cuando la API externa no está disponible, el sistema muestra de forma automáti
 4. Abre en tu navegador:
    ```bash 
    http://127.0.0.1:5000
-   
+
+Si lo deseas, también puedes hacerlo directamente desde la términal con las siguientes instrucciones: 
+
+INSTRUCCIONES:
+
+1. Descomprime el archivo.
+2. Abre una terminal en la carpeta descomprimida.
+3. Ejecuta:
+   pip install -r requirements.txt
+4. Luego:
+   python app.py
+5. Abre el navegador en:
+   http://127.0.0.1:5000
+
+
 💡 Autor
 
 Daniela Castillo/Auraria ✨

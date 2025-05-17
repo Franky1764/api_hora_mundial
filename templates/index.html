@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Consulta la Hora Mundial</title>
-    <!-- Bootstrap 5 CDN -->
+    <!-- Carga Bootstrap para estilos -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -12,12 +12,12 @@
     <div class="row justify-content-center">
         <div class="col-md-8 text-center">
             <h1 class="mb-4 text-primary">🌍 Consulta la Hora Mundial</h1>
-
+ <!-- Selector de zonas horarias -->
             <div class="mb-3">
                 <label for="zonas" class="form-label">Selecciona una zona horaria:</label>
                 <select id="zonas" class="form-select w-75 mx-auto"></select>
             </div>
-
+ <!-- Botón para consultar -->
             <button onclick="consultarHora()" class="btn btn-success mb-4">Consultar hora</button>
 
             <div id="resultado" class="alert alert-info d-none"></div>
@@ -26,12 +26,16 @@
 </div>
 
 <script>
+    // Variables para acceder a elementos del DOM
     const select = document.getElementById('zonas');
     const resultado = document.getElementById('resultado');
     const boton = document.querySelector('button');
     let intervaloHoraLocal = null;
 
-    // Función que actualiza la hora local cada segundo
+    /**
+   * Inicia un reloj que muestra la hora local del navegador.
+   * Se actualiza automáticamente cada segundo si la API no está disponible.
+   */
     function iniciarRelojLocal() {
         detenerRelojLocal(); // por si ya estaba corriendo
         intervaloHoraLocal = setInterval(() => {
@@ -44,7 +48,9 @@
             resultado.innerText = `⏰ Mostrando hora local del dispositivo:\n${horaLocal}`;
         }, 1000);
     }
-
+  /**
+   * Detiene el reloj local si está activo.
+   */
     function detenerRelojLocal() {
         if (intervaloHoraLocal !== null) {
             clearInterval(intervaloHoraLocal);
@@ -52,7 +58,10 @@
         }
     }
 
-    // Obtener zonas horarias desde la API
+  /**
+   * Carga las zonas horarias disponibles desde el backend (/zonas).
+   * Si la API falla, muestra mensaje y activa el reloj local.
+   */
     fetch('/zonas')
         .then(response => {
             if (!response.ok) throw new Error('Error al obtener zonas');
@@ -74,13 +83,16 @@
             iniciarRelojLocal();
         });
 
-    // Función para consultar hora desde API
+  /**
+   * Llama al backend para obtener la hora actual de la zona seleccionada.
+   * Si falla, activa el reloj local.
+   */
     function consultarHora() {
         const zona = select.value;
         fetch(`/hora?zona=${zona}`)
             .then(response => response.json())
             .then(data => {
-                detenerRelojLocal();
+                detenerRelojLocal();// Siempre detenemos reloj local al consultar API
                 if (data.hora_actual) {
                     resultado.classList.remove("d-none", "alert-danger", "alert-warning");
                     resultado.classList.add("alert-info");
