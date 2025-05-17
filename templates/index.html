@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Consulta la Hora Mundial</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="mb-4 text-primary">🌍 Consulta la Hora Mundial</h1>
+
+            <div class="mb-3">
+                <label for="zonas" class="form-label">Selecciona una zona horaria:</label>
+                <select id="zonas" class="form-select w-75 mx-auto"></select>
+            </div>
+
+            <button onclick="consultarHora()" class="btn btn-success mb-4">Consultar hora</button>
+
+            <div id="resultado" class="alert alert-info d-none"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const select = document.getElementById('zonas');
+    const resultado = document.getElementById('resultado');
+    const boton = document.querySelector('button');
+    let intervaloHoraLocal = null;
+
+    // Función que actualiza la hora local cada segundo
+    function iniciarRelojLocal() {
+        detenerRelojLocal(); // por si ya estaba corriendo
+        intervaloHoraLocal = setInterval(() => {
+            const ahora = new Date();
+            const horaLocal = ahora.toLocaleString('es-CL', {
+                timeZoneName: 'short'
+            });
+            resultado.classList.remove("d-none", "alert-danger");
+            resultado.classList.add("alert-warning");
+            resultado.innerText = `⏰ Mostrando hora local del dispositivo:\n${horaLocal}`;
+        }, 1000);
+    }
+
+    function detenerRelojLocal() {
+        if (intervaloHoraLocal !== null) {
+            clearInterval(intervaloHoraLocal);
+            intervaloHoraLocal = null;
+        }
+    }
+
+    // Obtener zonas horarias desde la API
+    fetch('/zonas')
+        .then(response => {
+            if (!response.ok) throw new Error('Error al obtener zonas');
+            return response.json();
+        })
+        .then(zonas => {
+            zonas.forEach(zona => {
+                const option = document.createElement('option');
+                option.value = zona;
+                option.text = zona;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('No se pudo obtener zonas:', error);
+            select.innerHTML = `<option>⚠️ Servicio no disponible,por favor vuelva más tarde</option>`;
+            select.disabled = true;
+            boton.disabled = true;
+            iniciarRelojLocal();
+        });
+
+    // Función para consultar hora desde API
+    function consultarHora() {
+        const zona = select.value;
+        fetch(`/hora?zona=${zona}`)
+            .then(response => response.json())
+            .then(data => {
+                detenerRelojLocal();
+                if (data.hora_actual) {
+                    resultado.classList.remove("d-none", "alert-danger", "alert-warning");
+                    resultado.classList.add("alert-info");
+                    resultado.innerText = `🕒 Hora actual en ${data.zona}: ${data.hora_actual}`;
+                } else {
+                    resultado.classList.remove("d-none", "alert-info");
+                    resultado.classList.add("alert-danger");
+                    resultado.innerText = `⚠️ Error: ${data.error}`;
+                }
+            })
+            .catch(error => {
+                console.error('Fallo al consultar hora:', error);
+                iniciarRelojLocal();
+            });
+    }
+</script>
+</body>
+</html>
