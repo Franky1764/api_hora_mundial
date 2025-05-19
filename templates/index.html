@@ -88,25 +88,46 @@
    * Si falla, activa el reloj local.
    */
     function consultarHora() {
-        const zona = select.value;
-        fetch(`/hora?zona=${zona}`)
-            .then(response => response.json())
-            .then(data => {
-                detenerRelojLocal();// Siempre detenemos reloj local al consultar API
-                if (data.hora_actual) {
-                    resultado.classList.remove("d-none", "alert-danger", "alert-warning");
-                    resultado.classList.add("alert-info");
-                    resultado.innerText = `🕒 Hora actual en ${data.zona}: ${data.hora_actual}`;
-                } else {
-                    resultado.classList.remove("d-none", "alert-info");
-                    resultado.classList.add("alert-danger");
-                    resultado.innerText = `⚠️ Error: ${data.error}`;
-                }
-            })
-            .catch(error => {
-                console.error('Fallo al consultar hora:', error);
-                iniciarRelojLocal();
-            });
+    const zona = select.value;
+    fetch(`/hora?zona=${zona}`)
+        .then(response => response.json())
+        .then(data => {
+            detenerRelojLocal(); // Siempre detenemos reloj local
+
+            if (data.hora_actual) {
+                const datetime = new Date(data.hora_actual);
+                const fecha = datetime.toLocaleDateString('es-CL');
+                const hora = datetime.toLocaleTimeString('es-CL');
+
+                resultado.classList.remove("d-none", "alert-danger", "alert-warning");
+                resultado.classList.add("alert-info", "text-center", "fs-6", "px-4", "py-3");
+                resultado.innerHTML = `
+                    🕒 Hora actual en <strong>${data.zona}</strong>:<br>
+                    <strong>Hora:</strong> ${hora}<br>
+                    <strong>Fecha:</strong> ${fecha}<br>
+                    <span class="text-muted small">(actualizándose en tiempo real)</span>
+                `;
+
+                intervaloHoraLocal = setInterval(() => {
+                    const ahora = new Date();
+                    const horaActual = ahora.toLocaleTimeString('es-CL');
+                    resultado.innerHTML = `
+                        🕒 Hora actual en <strong>${data.zona}</strong>:<br>
+                        <strong>Hora:</strong> ${horaActual}<br>
+                        <strong>Fecha:</strong> ${fecha}<br>
+                        <span class="text-muted small">(actualizándose en tiempo real)</span>
+                    `;
+                }, 1000);
+            } else {
+                resultado.classList.remove("d-none", "alert-info");
+                resultado.classList.add("alert-danger");
+                resultado.innerText = `⚠️ Error: ${data.error}`;
+            }
+        })
+        .catch(error => {
+            console.error('Fallo al consultar hora:', error);
+            iniciarRelojLocal();
+        })
     }
 </script>
 </body>

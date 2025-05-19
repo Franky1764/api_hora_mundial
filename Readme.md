@@ -15,9 +15,13 @@ Cuando la API externa no está disponible, el sistema muestra de forma automáti
 
 ---
 
-## 📸 Vista previa
+## 📸 Vista previa Sin Conexión
 
 ![Vista previa de la app](vistaprevia.png)
+
+## 📸 Vista previa Conectada
+
+![Vista previa de la app](vistapreviaconexionexitosa.png)
 
 ---
 
